@@ -1,0 +1,341 @@
+/**
+ * Raffle Draw — front end and editor.
+ *
+ * No colours or fonts of its own. Everything resolves to the active theme's theme.json presets,
+ * with a fallback chain that covers the common naming schemes:
+ *
+ *   base / contrast / accent-1   Twenty Twenty-Four, Twenty Twenty-Five and most new block themes
+ *   background / foreground / primary   older block themes
+ *   Canvas / CanvasText / currentColor  anything else (CSS system colours)
+ *
+ * The block's own colour, typography and spacing settings (block.json "supports") sit on top.
+ * To restyle it from a theme, set the --raffle-draw-* custom properties below; nothing else is
+ * needed.
+ *
+ * THREE VALUES ARE SHARED WITH OTHER FILES. Change them together, or reels land on the wrong digit:
+ *   --raffle-draw-passes 6       = DVRANIC_RAFFLE_DRAW_REEL_PASSES (render.php) = REEL_PASSES (view.js)
+ *   --raffle-draw-spin   150ms   = SPIN_LOOP_MS (view.js)
+ *   every digit cell is exactly one reel window tall, so the percentage maths in view.js holds.
+ */
+
+.wp-block-dvranic-raffle-draw {
+	--raffle-draw-passes: 6;
+	--raffle-draw-spin: 150ms;
+
+	--raffle-draw-accent: var(--wp--preset--color--accent-1, var(--wp--preset--color--primary, currentColor));
+	--raffle-draw-face: var(--wp--preset--color--base, var(--wp--preset--color--background, Canvas));
+	--raffle-draw-ink: var(--wp--preset--color--contrast, var(--wp--preset--color--foreground, CanvasText));
+	--raffle-draw-stage: var(--wp--preset--color--base, var(--wp--preset--color--background, Canvas));
+	--raffle-draw-overlay: #000;
+	--raffle-draw-dim: 0.5;
+
+	/* One digit cell. Shrinks as more digits need to fit side by side. */
+	--raffle-draw-cell: clamp(3rem, calc(70vw / (var(--raffle-draw-digits, 4) * 0.85)), 11rem);
+	--raffle-draw-gap: clamp(0.25rem, 0.8vw, 0.75rem);
+
+	position: relative;
+	box-sizing: border-box;
+	overflow: hidden;
+	isolation: isolate;
+	padding: clamp(1.5rem, 4vw, 4rem) clamp(1rem, 3vw, 3rem);
+
+	* {
+		box-sizing: border-box;
+	}
+
+	/* Themes commonly give buttons and wrappers a display value, which beats the `hidden`
+	   attribute. The Interactivity API hides things with that attribute, so it must win here. */
+	[hidden] {
+		display: none !important;
+	}
+
+	/* Full screen hides whatever header and footer the theme has, without knowing anything about
+	   the theme. The stage then needs its own background — the default fullscreen backdrop is black. */
+	&:fullscreen {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100vw;
+		max-width: none;
+		height: 100vh;
+		margin: 0;
+		overflow-y: auto;
+		background-color: var(--raffle-draw-stage);
+	}
+
+	&.has-background-image {
+		color: var(--wp--preset--color--base, #fff);
+	}
+
+	&.is-empty {
+		padding: 1rem;
+		border: 2px dashed currentColor;
+	}
+}
+
+/* --- background ---------------------------------------------------------- */
+
+.raffle-draw__background {
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+}
+
+.wp-block-dvranic-raffle-draw .raffle-draw__background-image {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	margin: 0;
+	object-fit: cover;
+}
+
+.raffle-draw__overlay {
+	position: absolute;
+	inset: 0;
+	background-color: var(--raffle-draw-overlay);
+	opacity: var(--raffle-draw-dim);
+}
+
+/* --- full-screen toggle -------------------------------------------------- */
+
+.wp-block-dvranic-raffle-draw .raffle-draw__fullscreen {
+	position: absolute;
+	top: 0.75rem;
+	right: 0.75rem;
+	z-index: 2;
+	display: inline-flex;
+	padding: 0.4rem;
+	border: 0;
+	border-radius: 0.25rem;
+	background: transparent;
+	color: inherit;
+	opacity: 0.55;
+	cursor: pointer;
+
+	&:hover,
+	&:focus-visible {
+		opacity: 1;
+	}
+}
+
+/* --- stage --------------------------------------------------------------- */
+
+.raffle-draw__stage {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: clamp(1rem, 2.5vw, 2rem);
+	width: 100%;
+	text-align: center;
+}
+
+.wp-block-dvranic-raffle-draw .raffle-draw__headline {
+	margin: 0;
+	color: inherit;
+}
+
+.wp-block-dvranic-raffle-draw .raffle-draw__now {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25em;
+	margin: 0;
+	font-size: clamp(1rem, 2vw, 1.75rem);
+}
+
+.raffle-draw__now-label {
+	font-size: 0.6em;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	opacity: 0.75;
+}
+
+/* --- reels --------------------------------------------------------------- */
+
+.raffle-draw__reels {
+	display: flex;
+	gap: var(--raffle-draw-gap);
+	padding: calc(var(--raffle-draw-gap) * 2);
+	border-radius: calc(var(--raffle-draw-gap) * 2);
+	background: var(--raffle-draw-accent);
+	box-shadow: 0 1rem 3rem rgb(0 0 0 / 25%);
+	transition: filter 600ms ease, opacity 600ms ease;
+}
+
+.raffle-draw__reel {
+	overflow: hidden;
+	width: calc(var(--raffle-draw-cell) * 0.75);
+	height: var(--raffle-draw-cell);
+	border-radius: calc(var(--raffle-draw-gap) * 1.2);
+	background: var(--raffle-draw-face);
+	/* The shading top and bottom is what makes a flat strip read as a drum. */
+	box-shadow:
+		inset 0 0.5em 0.7em -0.4em rgb(0 0 0 / 45%),
+		inset 0 -0.5em 0.7em -0.4em rgb(0 0 0 / 45%);
+}
+
+/* Positions are in percent of the strip's own height, never pixels: view.js never measures. */
+.raffle-draw__strip {
+	display: flex;
+	flex-direction: column;
+	will-change: transform;
+
+	/* Phase 1, the loop: one pass of ten digits, forever, until the reel is told to stop. */
+	&.is-spinning {
+		animation: raffle-draw-spin var(--raffle-draw-spin) linear infinite;
+	}
+
+	/* Phase 2, the landing: view.js supplies --from (where the loop had got to, computed from the
+	   clock) and --to (the winning digit a few passes on). `forwards` holds the last frame. */
+	&.is-landing {
+		animation: raffle-draw-land var(--land-duration, 900ms) cubic-bezier(0.16, 0.9, 0.3, 1.06) forwards;
+	}
+}
+
+@keyframes raffle-draw-spin {
+	from {
+		transform: translateY(0);
+	}
+
+	to {
+		transform: translateY(calc(-100% / var(--raffle-draw-passes)));
+	}
+}
+
+/* The curve above overshoots a touch past 1. That small bounce is the slot-machine feel. */
+@keyframes raffle-draw-land {
+	from {
+		transform: translateY(calc(-1 * var(--from, 0%)));
+	}
+
+	to {
+		transform: translateY(calc(-1 * var(--to, 0%)));
+	}
+}
+
+.raffle-draw__digit {
+	display: flex;
+	flex: 0 0 var(--raffle-draw-cell);
+	align-items: center;
+	justify-content: center;
+	height: var(--raffle-draw-cell);
+	font-size: calc(var(--raffle-draw-cell) * 0.7);
+	font-weight: 700;
+	line-height: 1;
+	color: var(--raffle-draw-ink);
+	font-variant-numeric: tabular-nums;
+}
+
+/* --- draw button --------------------------------------------------------- */
+
+/* Colours, radius and font come from the theme's global button styles via .wp-element-button. */
+.wp-block-dvranic-raffle-draw .raffle-draw__actions {
+	margin: 0;
+}
+
+.wp-block-dvranic-raffle-draw .raffle-draw__draw {
+	min-width: 10rem;
+	cursor: pointer;
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: progress;
+	}
+}
+
+/* --- winners ------------------------------------------------------------- */
+
+.wp-block-dvranic-raffle-draw .raffle-draw__winners {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.75rem;
+	width: 100%;
+	max-width: 60rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.raffle-draw__winner {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	min-width: 10rem;
+	padding: 0.75rem 1.25rem;
+	border: 1px solid currentColor;
+	border-radius: 0.5rem;
+	opacity: 0.4;
+	transition: opacity 400ms ease;
+
+	&.is-current {
+		opacity: 0.75;
+		border-style: dashed;
+	}
+
+	&.is-filled {
+		opacity: 1;
+		border-color: var(--raffle-draw-accent);
+	}
+}
+
+.raffle-draw__winner-label {
+	font-size: 0.85em;
+}
+
+.raffle-draw__winner-number {
+	font-size: 1.75em;
+	font-weight: 700;
+	line-height: 1.1;
+	font-variant-numeric: tabular-nums;
+
+	/* An empty slot keeps its height, so the list does not jump as winners land. */
+	&:empty::before {
+		content: "–––";
+		opacity: 0.5;
+	}
+}
+
+/* --- after the last winner ----------------------------------------------- */
+
+.wp-block-dvranic-raffle-draw.is-finished .raffle-draw__reels {
+	filter: grayscale(1);
+	opacity: 0.5;
+}
+
+/* --- screen readers ------------------------------------------------------ */
+
+/* Not every theme ships .screen-reader-text, so the block carries its own copy. */
+.wp-block-dvranic-raffle-draw .raffle-draw__sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/* --- reduced motion ------------------------------------------------------ */
+
+/* No spinning blur. view.js lands the reels straight away, this fades the result in. */
+@media (prefers-reduced-motion: reduce) {
+	.raffle-draw__strip.is-spinning {
+		animation: none;
+		opacity: 0.3;
+	}
+
+	.raffle-draw__strip.is-landing {
+		animation: raffle-draw-fade 300ms ease-out forwards;
+		transform: translateY(calc(-1 * var(--to, 0%)));
+	}
+
+	@keyframes raffle-draw-fade {
+		from {
+			opacity: 0.3;
+		}
+
+		to {
+			opacity: 1;
+		}
+	}
+}

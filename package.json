@@ -1,0 +1,31 @@
+{
+	"name": "raffle-draw",
+	"version": "1.0.0",
+	"description": "A live raffle draw block for WordPress: upload a CSV of ticket numbers and draw winners on spinning digit reels.",
+	"author": "Dejan Rudić Vranić",
+	"license": "GPL-2.0-or-later",
+	"private": true,
+	"files": [
+		"build",
+		"includes",
+		"languages",
+		"raffle-draw.php",
+		"readme.txt",
+		"LICENSE"
+	],
+	"scripts": {
+		"build": "wp-scripts build --experimental-modules",
+		"start": "wp-scripts start --experimental-modules",
+		"test": "wp-scripts test-unit-js && php tests/php/run.php",
+		"test:js": "wp-scripts test-unit-js",
+		"test:php": "php tests/php/run.php",
+		"lint:js": "wp-scripts lint-js src tests",
+		"plugin-zip": "wp-scripts plugin-zip"
+	},
+	"devDependencies": {
+		"@wordpress/interactivity": "^8.0.0",
+		"@wordpress/scripts": "^37.0.0",
+		"vite": "^8.3.5",
+		"vitest": "^5.0.5"
+	}
+}

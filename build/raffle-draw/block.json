@@ -1,0 +1,95 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "dvranic/raffle-draw",
+  "version": "1.0.0",
+  "title": "Raffle Draw",
+  "category": "widgets",
+  "icon": "tickets-alt",
+  "description": "Draw raffle winners live on spinning digit reels, from a CSV of ticket numbers.",
+  "keywords": [
+    "raffle",
+    "lottery",
+    "draw",
+    "giveaway",
+    "winner",
+    "random"
+  ],
+  "textdomain": "raffle-draw",
+  "attributes": {
+    "csvId": {
+      "type": "number",
+      "default": 0
+    },
+    "csvName": {
+      "type": "string",
+      "default": ""
+    },
+    "prizes": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "winnersCount": {
+      "type": "number",
+      "default": 3
+    },
+    "headline": {
+      "type": "string",
+      "default": ""
+    },
+    "bgImageId": {
+      "type": "number",
+      "default": 0
+    },
+    "bgImageUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "dimRatio": {
+      "type": "number",
+      "default": 50
+    }
+  },
+  "supports": {
+    "html": false,
+    "multiple": false,
+    "align": [
+      "wide",
+      "full"
+    ],
+    "color": {
+      "text": true,
+      "background": true,
+      "link": false
+    },
+    "typography": {
+      "fontSize": true,
+      "lineHeight": true,
+      "__experimentalFontFamily": true
+    },
+    "spacing": {
+      "padding": true,
+      "margin": [
+        "top",
+        "bottom"
+      ]
+    }
+  },
+  "example": {
+    "attributes": {
+      "headline": "Sponsor raffle",
+      "prizes": [
+        "Conference ticket",
+        "Mechanical keyboard"
+      ]
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScriptModule": "file:./view.js",
+  "render": "file:./render.php"
+}
