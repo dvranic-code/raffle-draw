@@ -25,7 +25,9 @@
 	--raffle-draw-accent: var(--wp--preset--color--accent-1, var(--wp--preset--color--primary, currentColor));
 	--raffle-draw-face: var(--wp--preset--color--base, var(--wp--preset--color--background, Canvas));
 	--raffle-draw-ink: var(--wp--preset--color--contrast, var(--wp--preset--color--foreground, CanvasText));
-	--raffle-draw-stage: var(--wp--preset--color--base, var(--wp--preset--color--background, Canvas));
+	/* Full screen: the editor's colour, else the background the stage sat on (set by view.js),
+	   else the theme's base colour. */
+	--raffle-draw-stage: var(--raffle-draw-fullscreen-color, var(--raffle-draw-inherited-bg, var(--wp--preset--color--base, var(--wp--preset--color--background, Canvas))));
 	--raffle-draw-overlay: #000;
 	--raffle-draw-dim: 0.5;
 
@@ -234,7 +236,13 @@
 }
 
 .wp-block-dvranic-raffle-draw .raffle-draw__draw {
+	/* Some themes make buttons inline-flex without centring, which leaves the label on the left
+	   of the min-width. Centre it either way. */
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	min-width: 10rem;
+	text-align: center;
 	cursor: pointer;
 
 	&:disabled {
@@ -246,9 +254,9 @@
 /* --- winners ------------------------------------------------------------- */
 
 .wp-block-dvranic-raffle-draw .raffle-draw__winners {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
+	/* A grid, so every slot gets the same width and height however long its prize name is. */
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
 	gap: 0.75rem;
 	width: 100%;
 	max-width: 60rem;
@@ -257,11 +265,14 @@
 	list-style: none;
 }
 
-.raffle-draw__winner {
+.wp-block-dvranic-raffle-draw .raffle-draw__winner {
+	/* Themes often space list items (li + li { margin-top }), which made every slot after the
+	   first shorter and lower. The grid gap does the spacing here. */
+	margin: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 0.25rem;
-	min-width: 10rem;
+	justify-content: center;
 	padding: 0.75rem 1.25rem;
 	border: 1px solid currentColor;
 	border-radius: 0.5rem;

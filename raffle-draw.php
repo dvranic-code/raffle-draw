@@ -3,7 +3,7 @@
  * Plugin Name:       Raffle Draw
  * Plugin URI:        https://github.com/dvranic-code/raffle-draw
  * Description:       A live raffle draw for the big screen: upload a CSV of ticket numbers and draw winners on spinning digit reels. Fair, offline once loaded, styled by your theme.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.6
  * Requires PHP:      7.4
  * Author:            Dejan Rudić Vranić

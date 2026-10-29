@@ -12,6 +12,7 @@ import {
 	MediaUpload,
 	MediaUploadCheck,
 	useBlockProps,
+	useSettings,
 } from '@wordpress/block-editor';
 import {
 	Button,
@@ -20,6 +21,9 @@ import {
 	RangeControl,
 	Spinner,
 	TextControl,
+	ToggleControl,
+	ColorPalette,
+	BaseControl,
 	Flex,
 	FlexBlock,
 } from '@wordpress/components';
@@ -273,7 +277,11 @@ export default function Edit( { attributes, setAttributes } ) {
 		bgImageId,
 		bgImageUrl,
 		dimRatio,
+		eventMode,
+		fullscreenColor,
 	} = attributes;
+
+	const [ palette ] = useSettings( 'color.palette' );
 
 	const preflight = usePreflight( csvId );
 	const digits = preflight.report?.digits || 4;
@@ -374,6 +382,56 @@ export default function Edit( { attributes, setAttributes } ) {
 							}
 						/>
 					) }
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Event & full screen', 'raffle-draw' ) }
+					initialOpen={ false }
+				>
+					<ToggleControl
+						__nextHasNoMarginBottom
+						label={ __( 'Event mode', 'raffle-draw' ) }
+						help={
+							eventMode
+								? __(
+										'For a page that is only the stage: Space draws from anywhere, and leaving the page after a draw asks first.',
+										'raffle-draw'
+									)
+								: __(
+										'For a demo inside an article: Space scrolls as usual and only draws in full screen; readers can leave freely.',
+										'raffle-draw'
+									)
+						}
+						checked={ eventMode }
+						onChange={ ( value ) =>
+							setAttributes( { eventMode: value } )
+						}
+					/>
+					<BaseControl
+						__nextHasNoMarginBottom
+						id="raffle-draw-fullscreen-color"
+						label={ __( 'Full-screen background', 'raffle-draw' ) }
+						help={ __(
+							'Leave empty to use the background the block sits on.',
+							'raffle-draw'
+						) }
+					>
+						<ColorPalette
+							colors={ palette || [] }
+							value={ fullscreenColor }
+							onChange={ ( value ) => {
+								const preset = ( palette || [] ).find(
+									( color ) => color.color === value
+								);
+								setAttributes( {
+									fullscreenColor: value || '',
+									fullscreenColorSlug: preset
+										? preset.slug
+										: '',
+								} );
+							} }
+						/>
+					</BaseControl>
 				</PanelBody>
 
 				<PanelBody

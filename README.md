@@ -63,8 +63,19 @@ There is a sample in [`docs/sample-tickets.csv`](docs/sample-tickets.csv).
 - **Prizes** are drawn in list order, top to bottom. Put the grand prize last for suspense. With no
   prizes listed, set a number of winners instead.
 - **Draw** with the button, a click, a touch or Space. A presenter clicker that sends Space works.
-- **Full screen**: the icon in the top-right corner hides your site's header and footer.
+- **Full screen**: the icon in the top-right corner hides your site's header and footer. It keeps
+  the background the block sits on, or pick a colour under **Event & full screen → Full-screen
+  background**.
 - **Reset** by reloading the page. Once someone has won, the browser asks before it reloads.
+
+### Event mode
+
+On by default: the page is the stage. Space draws from anywhere on the page, and leaving after a
+draw asks first.
+
+Turn it off (**Event & full screen → Event mode**) when the block sits inside an article as a demo.
+Space then scrolls the page as usual and only draws while the stage is in full screen, and readers
+can leave without a prompt. The Draw button works either way.
 - People who ask their system for reduced motion get a short fade instead of spinning reels.
 
 ## How it works
@@ -89,7 +100,7 @@ Every colour is a custom property. Set any of these on `.wp-block-dvranic-raffle
 	--raffle-draw-accent: hotpink;   /* reel frame, filled winner border */
 	--raffle-draw-face: #fff;        /* reel background */
 	--raffle-draw-ink: #111;         /* digits */
-	--raffle-draw-stage: #000;       /* full-screen background */
+	--raffle-draw-stage: #000;       /* full-screen background (overrides the editor setting) */
 	--raffle-draw-overlay: #000;     /* tint over the background image */
 }
 ```

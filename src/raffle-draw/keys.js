@@ -34,3 +34,18 @@ export function shouldDrawOnKey( event ) {
 
 	return ! [ ...TYPING_TAGS, 'BUTTON' ].includes( target.tagName );
 }
+
+/**
+ * Is the Space shortcut listening at all?
+ *
+ * In event mode the stage owns the page, so Space draws from anywhere. Outside it — a block sitting
+ * in the middle of an article — Space belongs to the reader for scrolling, and only draws while the
+ * stage is in full screen.
+ *
+ * @param {boolean} eventMode         The block's Event mode setting.
+ * @param {boolean} isStageFullscreen Whether this stage is the full-screen element.
+ * @return {boolean} True if Space should be handled.
+ */
+export function spaceShortcutActive( eventMode, isStageFullscreen ) {
+	return eventMode || isStageFullscreen;
+}

@@ -4,7 +4,7 @@ Tags: raffle, lottery, giveaway, draw, block
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,6 +19,7 @@ Upload a CSV of ticket numbers, list your prizes, put the page on a projector an
 * Works offline once the page has loaded.
 * Colours and fonts come from your theme's theme.json.
 * Prize labels, full-screen mode, reduced-motion support.
+* Event mode for a dedicated stage page, or off for a live demo inside an article.
 
 == Installation ==
 
@@ -36,6 +37,12 @@ Column 1: ticket number (1–12 digits, leading zeros kept). Optional column 2: 
 Reload the page. Once someone has won, the browser asks first.
 
 == Changelog ==
+
+= 1.1.0 =
+* Event mode setting: turn it off for a demo inside an article, so Space scrolls as usual (it only draws in full screen) and readers can leave without a prompt.
+* Full-screen background colour setting; without one, full screen keeps the background the block sits on.
+* Winner slots now share one width and height, whatever the theme does to list items.
+* Draw button label is centred in themes that make buttons inline-flex.
 
 = 1.0.0 =
 * First release.

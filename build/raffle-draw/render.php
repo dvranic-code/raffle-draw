@@ -50,6 +50,13 @@ $slots  = dvranic_raffle_draw_slot_labels(
 $headline  = trim( (string) ( $attributes['headline'] ?? '' ) );
 $bg_id     = (int) ( $attributes['bgImageId'] ?? 0 );
 $dim_ratio = max( 0, min( 100, (int) ( $attributes['dimRatio'] ?? 50 ) ) );
+$event     = (bool) ( $attributes['eventMode'] ?? true );
+
+// Full-screen background: a theme palette colour is kept as its preset variable, so it follows the
+// theme if the palette changes; a custom colour must be a hex value.
+$fs_slug  = sanitize_key( (string) ( $attributes['fullscreenColorSlug'] ?? '' ) );
+$fs_hex   = sanitize_hex_color( (string) ( $attributes['fullscreenColor'] ?? '' ) );
+$fs_color = $fs_slug ? 'var(--wp--preset--color--' . $fs_slug . ')' : (string) $fs_hex;
 
 $context = array(
 	'groups'         => $parsed['groups'],
@@ -59,6 +66,8 @@ $context = array(
 	'current'        => 0,
 	'isSpinning'     => false,
 	'isFinished'     => false,
+	'eventMode'      => $event,
+	'hasFullscreenColor' => '' !== $fs_color,
 	'announce'       => '',
 	// Script modules cannot load JS translations yet, so the one sentence the browser builds is
 	// translated here and travels with the context.
@@ -80,7 +89,8 @@ $context = array(
 $wrapper = get_block_wrapper_attributes(
 	array(
 		'class' => $bg_id ? 'has-background-image' : '',
-		'style' => '--raffle-draw-digits:' . $digits . ';--raffle-draw-dim:' . ( $dim_ratio / 100 ) . ';',
+		'style' => '--raffle-draw-digits:' . $digits . ';--raffle-draw-dim:' . ( $dim_ratio / 100 ) . ';'
+			. ( $fs_color ? '--raffle-draw-fullscreen-color:' . $fs_color . ';' : '' ),
 	)
 );
 ?>

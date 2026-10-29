@@ -1,6 +1,6 @@
 {
 	"name": "raffle-draw",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "A live raffle draw block for WordPress: upload a CSV of ticket numbers and draw winners on spinning digit reels.",
 	"author": "Dejan Rudić Vranić",
 	"license": "GPL-2.0-or-later",

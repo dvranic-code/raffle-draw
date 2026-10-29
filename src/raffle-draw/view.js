@@ -29,7 +29,8 @@ import {
 	createCryptoRng,
 	totalWeight,
 } from './lottery';
-import { shouldDrawOnKey } from './keys';
+import { shouldDrawOnKey, spaceShortcutActive } from './keys';
+import { firstOpaqueColor } from './background';
 
 /** Must match DVRANIC_RAFFLE_DRAW_REEL_PASSES in render.php and --raffle-draw-passes in style.scss. */
 const REEL_PASSES = 6;
@@ -212,6 +213,18 @@ const { actions } = store( 'dvranic/raffle-draw', {
 		 * @param {KeyboardEvent} event
 		 */
 		onKeydown( event ) {
+			const context = getContext();
+			const { ref } = getElement();
+
+			if (
+				! spaceShortcutActive(
+					context.eventMode,
+					document.fullscreenElement === ref
+				)
+			) {
+				return;
+			}
+
 			// Swallow Space even on key-repeat, or a held key scrolls the stage away mid-spin.
 			const spaceIsOurs = shouldDrawOnKey( {
 				code: event.code,
@@ -231,15 +244,16 @@ const { actions } = store( 'dvranic/raffle-draw', {
 		},
 
 		/**
-		 * Once someone has won, an accidental reload asks first. A deliberate reload still resets
-		 * the draw — that is the reset button.
+		 * In event mode, once someone has won, an accidental reload asks first. A deliberate reload
+		 * still resets the draw — that is the reset button. Outside event mode (a demo inside an
+		 * article) readers come and go, so the browser is never asked to hold them.
 		 *
 		 * @param {BeforeUnloadEvent} event
 		 */
 		onBeforeUnload( event ) {
 			const context = getContext();
 
-			if ( ! context.winners.length ) {
+			if ( ! context.eventMode || ! context.winners.length ) {
 				return;
 			}
 
@@ -249,7 +263,6 @@ const { actions } = store( 'dvranic/raffle-draw', {
 
 		toggleFullscreen() {
 			const { ref } = getElement();
-			const stage = ref.closest( '.wp-block-dvranic-raffle-draw' );
 
 			// A focused button turns Space into its own click, so Space would toggle full screen
 			// instead of drawing. Let go of focus.
@@ -257,9 +270,35 @@ const { actions } = store( 'dvranic/raffle-draw', {
 
 			if ( document.fullscreenElement ) {
 				document.exitFullscreen();
-			} else if ( stage && stage.requestFullscreen ) {
-				stage.requestFullscreen();
+				return;
 			}
+
+			const stage = ref.closest( '.wp-block-dvranic-raffle-draw' );
+
+			if ( ! stage || ! stage.requestFullscreen ) {
+				return;
+			}
+
+			// No colour chosen in the editor: take the background the stage was sitting on, so full
+			// screen looks like the page rather than a white (or black) void.
+			if ( ! getContext().hasFullscreenColor ) {
+				const colors = [];
+				for (
+					let node = stage.parentElement;
+					node;
+					node = node.parentElement
+				) {
+					colors.push(
+						window.getComputedStyle( node ).backgroundColor
+					);
+				}
+				stage.style.setProperty(
+					'--raffle-draw-inherited-bg',
+					firstOpaqueColor( colors ) || 'Canvas'
+				);
+			}
+
+			stage.requestFullscreen();
 		},
 	},
 } );

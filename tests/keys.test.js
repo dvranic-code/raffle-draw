@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { shouldDrawOnKey } from '../src/raffle-draw/keys';
+import { shouldDrawOnKey, spaceShortcutActive } from '../src/raffle-draw/keys';
 
 const key = ( overrides = {} ) => ( {
 	code: 'Space',
@@ -52,5 +52,16 @@ describe( 'shouldDrawOnKey', () => {
 
 	it( 'copes with an event that has no target', () => {
 		expect( shouldDrawOnKey( key( { target: null } ) ) ).toBe( true );
+	} );
+} );
+
+describe( 'spaceShortcutActive', () => {
+	it( 'listens everywhere in event mode', () => {
+		expect( spaceShortcutActive( true, false ) ).toBe( true );
+	} );
+
+	it( 'outside event mode, listens only while the stage is full screen', () => {
+		expect( spaceShortcutActive( false, false ) ).toBe( false );
+		expect( spaceShortcutActive( false, true ) ).toBe( true );
 	} );
 } );
