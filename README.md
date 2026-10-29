@@ -43,7 +43,7 @@ ticket,weight
 4096,10
 ```
 
-- Ticket numbers are **digits only**. Leading zeros are kept: `007` stays `007`.
+- Ticket numbers are **digits only**, up to 12 of them. Leading zeros are kept: `007` stays `007`.
 - Mixed lengths are fine. The stage shows as many reels as the longest number has digits, and pads
   shorter numbers with zeros. (So `7` and `007` are different tickets but look the same on the reels
   when the longest number has three digits — avoid mixing the two.)

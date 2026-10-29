@@ -102,7 +102,7 @@ function PreflightReport( { report, error, loading } ) {
 		return (
 			<Notice status="error" isDismissible={ false }>
 				{ __(
-					'No ticket numbers found. Column 1 must hold digits only.',
+					'No ticket numbers found. Column 1 must hold 1–12 digits.',
 					'raffle-draw'
 				) }
 			</Notice>
@@ -117,8 +117,8 @@ function PreflightReport( { report, error, loading } ) {
 			sprintf(
 				/* translators: %d: number of rows. */
 				_n(
-					'%d row skipped: the ticket number is not digits only.',
-					'%d rows skipped: the ticket number is not digits only.',
+					'%d row skipped: the ticket number is not 1–12 digits.',
+					'%d rows skipped: the ticket number is not 1–12 digits.',
 					report.skipped,
 					'raffle-draw'
 				),
@@ -303,7 +303,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				<PanelBody title={ __( 'Tickets (CSV)', 'raffle-draw' ) }>
 					<p>
 						{ __(
-							'Column 1: ticket number (digits, leading zeros are kept). Optional column 2: weight, a whole number — 5 means five times the chance. No weight column means everyone has the same chance.',
+							'Column 1: ticket number (up to 12 digits, leading zeros are kept). Optional column 2: weight, a whole number — 5 means five times the chance. No weight column means everyone has the same chance.',
 							'raffle-draw'
 						) }
 					</p>

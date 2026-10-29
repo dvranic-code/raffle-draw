@@ -22,6 +22,12 @@ const DVRANIC_RAFFLE_DRAW_CSV_MIMES = array(
 );
 
 /**
+ * Longest ticket number accepted. Every digit becomes a reel of 60 elements, so an absurd "number"
+ * in the file would otherwise turn into an absurd page. Twelve covers any real ticket book.
+ */
+const DVRANIC_RAFFLE_DRAW_MAX_DIGITS = 12;
+
+/**
  * The shape every parse returns, so callers never have to check for missing keys.
  *
  * @return array{groups: array<int, array{weight: int, entries: string[]}>, entries: int, digits: int, rows: int, skipped: int, duplicates: int, invalid_weights: int}
@@ -67,7 +73,8 @@ function dvranic_raffle_draw_sniff_delimiter( string $line ): string {
  * , ; or tab, a UTF-8 BOM, CRLF line endings, quoted cells, stray spaces and an optional header row.
  * Anything it cannot use is counted rather than dropped silently, so the editor can say so.
  *
- * - A ticket number is digits only. Leading zeros are kept: "007" stays "007".
+ * - A ticket number is digits only, at most DVRANIC_RAFFLE_DRAW_MAX_DIGITS long. Leading zeros are
+ *   kept: "007" stays "007".
  * - A weight is a whole number of 1 or more. Missing means 1. Anything else (0, -3, 2.5, "abc") is
  *   also treated as 1 and counted — a weight of 0 would quietly take a ticket out of the draw.
  * - A number listed twice is one ticket; the first occurrence wins.
@@ -126,7 +133,7 @@ function dvranic_raffle_draw_parse_csv_file( string $path ): array {
 
 		++$result['rows'];
 
-		if ( ! ctype_digit( $number ) ) {
+		if ( ! ctype_digit( $number ) || strlen( $number ) > DVRANIC_RAFFLE_DRAW_MAX_DIGITS ) {
 			++$result['skipped'];
 			continue;
 		}

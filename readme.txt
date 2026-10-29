@@ -29,7 +29,7 @@ Upload a CSV of ticket numbers, list your prizes, put the page on a projector an
 
 = What does the CSV look like? =
 
-Column 1: ticket number (digits only, leading zeros kept). Optional column 2: weight, a whole number of 1 or more. A header row is optional. Commas, semicolons and tabs all work.
+Column 1: ticket number (1–12 digits, leading zeros kept). Optional column 2: weight, a whole number of 1 or more. A header row is optional. Commas, semicolons and tabs all work.
 
 = How do I reset the draw? =
 

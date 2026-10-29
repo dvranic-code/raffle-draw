@@ -63,6 +63,10 @@ check( 'test_invalid_weights_default_to_one', array( 'weight' => 1, 'entries' =>
 check( 'test_invalid_weights_counted', 4, $r['invalid_weights'] );
 check( 'test_groups_by_weight: lightest first', array( 1, 4 ), array_column( $r['groups'], 'weight' ) );
 
+// test_long_numbers_skipped: more than 12 digits is not a ticket number.
+$r = parse( 'long-numbers' );
+check( 'test_long_numbers_skipped', array( 1, 2, 12 ), array( $r['skipped'], $r['entries'], $r['digits'] ) );
+
 // Missing file.
 check( 'missing file gives the empty result', dvranic_raffle_draw_empty_result(), dvranic_raffle_draw_parse_csv_file( __DIR__ . '/fixtures/nope.csv' ) );
 
